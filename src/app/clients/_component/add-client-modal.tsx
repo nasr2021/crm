@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import {
   Dialog,
   DialogTitle,
@@ -12,98 +12,69 @@ import {
   Box,
   Typography,
 } from "@mui/material"
-
+import { useClientMutation, useClientUpdateMutation } from "@/app/mutation/client-mutation"
+import { useForm, Controller, Form } from "react-hook-form"
+import { FormClientModal } from "./form"
 interface AddClientModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onAddClient: (client: any) => void
+  data?:any
+
 }
 
-export function AddClientModal({ open, onOpenChange, onAddClient }: AddClientModalProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    company: "",
-    email: "",
-    phone: "",
-    status: "active",
-    notes: "",
+export function AddClientModal({ open, onOpenChange, onAddClient, data }: AddClientModalProps) {
+  const {mutate:createClient} = useClientMutation()
+  const {mutate:updateClient} = useClientUpdateMutation() 
+console.log('data',data)
+  const methods = useForm({
+    defaultValues: {
+      id: data?.id || "",
+      name: data?.name || "",
+      company: data?.company || "",
+      email: data?.email || "",
+      phone: data?.phone || "",
+      status: data?.status || "active",
+      notes: data?.notes || "",
+
+    },
   })
+  const {control, handleSubmit, reset} = methods
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onAddClient(formData)
-    setFormData({ name: "", company: "", email: "", phone: "", status: "active", notes: "" })
+const onSubmit = (values: any) => {
+    if (values.id) {
+      updateClient(values)
+    } else {
+      const{id, ...rest} = values
+      createClient(rest)
+    
+    }
+    onAddClient(values)
     onOpenChange(false)
+    reset()
   }
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+
 
   return (
     <Dialog open={open} onClose={() => onOpenChange(false)} fullWidth maxWidth="sm">
-      <DialogTitle>إضافة عميل جديد</DialogTitle>
+      <DialogTitle>{data?.id ? "تحديث العميل" : "إضافة العميل"}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
           أدخل معلومات العميل الجديد في النموذج أدناه
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField
-            label="الاسم الكامل *"
-            value={formData.name}
-            onChange={(e) => handleInputChange("name", e.target.value)}
-            required
-            dir="rtl"
-          />
-          <TextField
-            label="اسم الشركة *"
-            value={formData.company}
-            onChange={(e) => handleInputChange("company", e.target.value)}
-            required
-            dir="rtl"
-          />
-          <TextField
-            label="البريد الإلكتروني *"
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
-            required
-            dir="ltr"
-          />
-          <TextField
-            label="رقم الهاتف *"
-            value={formData.phone}
-            onChange={(e) => handleInputChange("phone", e.target.value)}
-            required
-            dir="ltr"
-          />
-          <TextField
-            select
-            label="الحالة"
-            value={formData.status}
-            onChange={(e) => handleInputChange("status", e.target.value)}
-          >
-            <MenuItem value="active">نشط</MenuItem>
-            <MenuItem value="inactive">غير نشط</MenuItem>
-          </TextField>
-          <TextField
-            label="ملاحظات"
-            value={formData.notes}
-            onChange={(e) => handleInputChange("notes", e.target.value)}
-            multiline
-            rows={3}
-            dir="rtl"
-          />
-        </Box>
+       <FormClientModal onOpenChange={onOpenChange} data={data}  />
+
+
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" onClick={() => onOpenChange(false)}>
           إلغاء
         </Button>
-        <Button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
-          إضافة العميل
-        </Button>
+      
       </DialogActions>
     </Dialog>
   )
 }
+
+

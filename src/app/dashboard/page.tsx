@@ -1,7 +1,7 @@
-import { DashboardLayout } from "../../../components/dashbord-layout";
 import { DashboardWidgets } from "./_components/dashboard-widgets";
 
 export default function DashboardPage() {
+  console.log('DashboardPage');
   return (
 
       <div className="space-y-6">

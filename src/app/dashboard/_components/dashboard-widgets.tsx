@@ -1,3 +1,4 @@
+"use client"
 import React from "react"
 import { Card, CardContent, CardHeader, Typography, Box } from "@mui/material"
 import { Users, DollarSign, Handshake, Ticket } from "lucide-react"
